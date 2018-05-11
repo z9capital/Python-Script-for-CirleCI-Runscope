@@ -84,7 +84,8 @@ def _get_result(test_run):
 
                     if current_error_assertions_data > 0:
                         for current_assertion_data in current_request.get("assertions"):
-                            print " - {}, actual: {}, target: {}".format(current_assertion_data.get("comparison"),
+                            print " - {} - {}, actual: {}, target: {}".format(current_assertion_data.get("comparison"),
+                                                                         current_assertion_data.get("source"),
                                                                          current_assertion_data.get("actual_value"),
                                                                          current_assertion_data.get("target_value"))
                     if current_error_variables_data > 0:
