@@ -26,23 +26,18 @@ def main():
                     if result.get("result") in ["pass", "fail"]:
                         results[test_run_id] = result
 
-        pass_count = sum([r.get("result") == "pass" for r in results.values()])
-        fail_count = sum([r.get("result") == "fail" for r in results.values()])
+        # pass_count = sum([r.get("result") == "pass" for r in results.values()])
+        # fail_count = sum([r.get("result") == "fail" for r in results.values()])
 
         if fail_count > 0:
-            print "TestFailed: {} test runs passed. {} test runs failed.".format(pass_count, fail_count)
-            # todo - check errors
-            # print "Errors:"
-            # for r in results.values():
-            #     if r.get("result") == "fail":
-            #         print "Cause:" + r
-
+            # print test_runs[0].get('test_name') + " failed: {} test runs passed. {} test runs failed.".format(pass_count, fail_count)
+            print test_runs[0].get('test_name') + " failed: {} test pack runs failed!"
             exit(1)
 
-        print "All tests are passed."
-    # else:
-    #     print "Runscope can not run any test!"
-    #     exit(1)
+        print test_runs[0].get('test_name') + " whole test pack are passed!"
+    else:
+        print "Runscope can not run any test!"
+        exit(1)
 
 
 def _get_result(test_run):
@@ -69,7 +64,36 @@ def _get_result(test_run):
     result_resp = requests.get(result_url, headers=headers)
 
     if result_resp.ok:
-        return result_resp.json().get("data")
+        response_data = result_resp.json().get("data")
+
+        error_variables_data = response_data.get("variables_failed")
+        error_assertions_data = response_data.get("assertions_failed")
+        error_scripts_data = response_data.get("scripts_failed")
+
+        if (error_variables_data > 0) or (error_assertions_data > 0) or (error_scripts_data > 0):
+            requests_array = response_data.get("requests")
+
+            for current_request in requests_array:
+
+                current_error_variables_data = current_request.get("variables_failed")
+                current_error_assertions_data = current_request.get("assertions_failed")
+                current_error_scripts_data = current_request.get("scripts_failed")
+
+                if (current_error_variables_data > 0) or (current_error_assertions_data > 0) or (current_error_scripts_data > 0):
+                    print "* Error with {} method in {}:".format(current_request.get("method"), current_request.get("url"))
+
+                    if current_error_assertions_data > 0:
+                        for current_assertion_data in current_request.get("assertions"):
+                            print " - {}, actual: {}, target: {}".format(current_assertion_data.get("comparison"),
+                                                                         current_assertion_data.get("actual_value"),
+                                                                         current_assertion_data.get("target_value"))
+                    if current_error_variables_data > 0:
+                        print " - Check your Runscope variables"
+
+                    if current_error_scripts_data > 0:
+                        print " - Check your Runscope script data"
+
+        return response_data
 
     return None
 
