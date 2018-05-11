@@ -55,7 +55,7 @@ def _get_result(test_run):
         "test_run_id": test_run.get("test_run_id")
     }
     result_url = "{base_url}/buckets/{bucket_key}/tests/{test_id}/results/{test_run_id}".format(**opts)
-    print "Getting result: {}".format(result_url)
+    # print "Getting result: {}".format(result_url)
 
     headers = {
         "Authorization": "Bearer {}".format(API_TOKEN),
