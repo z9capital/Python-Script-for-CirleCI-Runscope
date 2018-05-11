@@ -27,7 +27,7 @@ def main():
                         results[test_run_id] = result
 
         # pass_count = sum([r.get("result") == "pass" for r in results.values()])
-        # fail_count = sum([r.get("result") == "fail" for r in results.values()])
+        fail_count = sum([r.get("result") == "fail" for r in results.values()])
 
         if fail_count > 0:
             # print test_runs[0].get('test_name') + " failed: {} test runs passed. {} test runs failed.".format(pass_count, fail_count)
