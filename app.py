@@ -23,7 +23,8 @@ def main():
                 test_run_id = run.get("test_run_id")
                 if not test_run_id in results:
                     result = _get_result(run)
-                    if result.get("result") in ["pass", "fail"]:
+                    # if result.get("result") in ["pass", "fail"]:
+                    if (result is not None) and (result.get("result") in ["pass", "fail"]):
                         results[test_run_id] = result
 
         # pass_count = sum([r.get("result") == "pass" for r in results.values()])
