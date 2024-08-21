@@ -3,17 +3,16 @@ import sys
 import time
 import os
 
-
 def main():
     trigger_url = sys.argv[1]
-    trigger_resp = requests.get(trigger_url)
+    trigger_resp = requests.get(trigger_url, verify=False)
 
     if trigger_resp.ok:
         trigger_json = trigger_resp.json().get("data", {})
 
         test_runs = trigger_json.get("runs", [])
 
-        print "Started {} test runs.".format(len(test_runs))
+        print("Started {} test runs.".format(len(test_runs)))
 
         results = {}
         while len(results.keys()) < len(test_runs):
@@ -31,20 +30,19 @@ def main():
         fail_count = sum([r.get("result") == "fail" for r in results.values()])
 
         if fail_count > 0:
-            # print test_runs[0].get('test_name') + " failed: {} test runs passed. {} test runs failed.".format(pass_count, fail_count)
-            print test_runs[0].get('test_name') + " failed: {} test pack runs failed!"
+            print(test_runs[0].get('test_name') + " failed: {} test pack runs failed!")
             exit(1)
 
-        print test_runs[0].get('test_name') + " whole test pack are passed!"
+        print(test_runs[0].get('test_name') + " whole test pack are passed!")
     else:
-        print "Runscope can not run any test!"
+        print("Runscope can not run any test!")
         exit(1)
 
 
 def _get_result(test_run):
     # generate Personal Access Token at https://www.runscope.com/applications
     if not "RUNSCOPE_ACCESS_TOKEN" in os.environ:
-        print "Please set the environment variable RUNSCOPE_ACCESS_TOKEN. You can get an access token by going to https://www.runscope.com/applications"
+        print("Please set the environment variable RUNSCOPE_ACCESS_TOKEN. You can get an access token by going to https://www.runscope.com/applications")
         exit(1)
 
     API_TOKEN = os.environ["RUNSCOPE_ACCESS_TOKEN"]
@@ -56,13 +54,12 @@ def _get_result(test_run):
         "test_run_id": test_run.get("test_run_id")
     }
     result_url = "{base_url}/buckets/{bucket_key}/tests/{test_id}/results/{test_run_id}".format(**opts)
-    # print "Getting result: {}".format(result_url)
 
     headers = {
         "Authorization": "Bearer {}".format(API_TOKEN),
         "User-Agent": "python-trigger-sample"
     }
-    result_resp = requests.get(result_url, headers=headers)
+    result_resp = requests.get(result_url, headers=headers, verify=False)
 
     if result_resp.ok:
         response_data = result_resp.json().get("data")
@@ -81,19 +78,19 @@ def _get_result(test_run):
                 current_error_scripts_data = current_request.get("scripts_failed")
 
                 if (current_error_variables_data > 0) or (current_error_assertions_data > 0) or (current_error_scripts_data > 0):
-                    print "* Error with {} method in {}:".format(current_request.get("method"), current_request.get("url"))
+                    print("* Error with {} method in {}:".format(current_request.get("method"), current_request.get("url")))
 
                     if current_error_assertions_data > 0:
                         for current_assertion_data in current_request.get("assertions"):
-                            print " - {} - {}, actual: {}, target: {}".format(current_assertion_data.get("comparison"),
+                            print(" - {} - {}, actual: {}, target: {}".format(current_assertion_data.get("comparison"),
                                                                          current_assertion_data.get("source"),
                                                                          current_assertion_data.get("actual_value"),
-                                                                         current_assertion_data.get("target_value"))
+                                                                         current_assertion_data.get("target_value")))
                     if current_error_variables_data > 0:
-                        print " - Check your Runscope variables"
+                        print(" - Check your Runscope variables")
 
                     if current_error_scripts_data > 0:
-                        print " - Check your Runscope script data"
+                        print(" - Check your Runscope script data")
 
         return response_data
 
